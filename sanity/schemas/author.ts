@@ -32,14 +32,8 @@ export const authorSchema = defineType({
     defineField({
       name: 'bio',
       title: 'Bio',
-      type: 'array',
-      of: [
-        {
-          type: 'block',
-          styles: [{ title: 'Normal', value: 'normal' }],
-          lists: [],
-        },
-      ],
+      type: 'text',
+      rows: 4,
     }),
   ],
   preview: {

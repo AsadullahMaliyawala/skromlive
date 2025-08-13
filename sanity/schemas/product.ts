@@ -44,7 +44,7 @@ export const productSchema = defineType({
       type: 'reference',
       to: [{ type: 'category' }],
       // Temporarily optional during migration
-    }),
+    } as any),
     defineField({
       name: 'thumbnails',
       title: 'Thumbnail Images',

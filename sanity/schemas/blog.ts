@@ -27,7 +27,7 @@ export const blogSchema = defineType({
       type: 'reference',
       to: [{ type: 'author' }],
       validation: (Rule) => Rule.required(),
-    }),
+    } as any),
     defineField({
       name: 'mainImage',
       title: 'Main image',

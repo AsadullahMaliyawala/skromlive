@@ -33,9 +33,12 @@ const QuickViewModal = () => {
   const handleAddToCart = () => {
     dispatch(
       addItemToCart({
-        ...product,
         id: product.id || parseInt(product._id || '0'), // Ensure id is present and is a number
+        title: product.title,
+        price: product.price,
+        discountedPrice: product.discountedPrice || product.price, // Ensure discountedPrice is present
         quantity,
+        imgs: product.imgs,
       })
     );
 

@@ -33,7 +33,6 @@ export const authorSchema = defineType({
       name: 'bio',
       title: 'Bio',
       type: 'text',
-      rows: 4,
     }),
   ],
   preview: {

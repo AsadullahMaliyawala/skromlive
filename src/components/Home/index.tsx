@@ -1,9 +1,9 @@
 import React from "react";
-import HeroBanner from "./HeroBanner";
-import PlayModes from "./PlayModes";
+import Hero from "./Hero";
 import Categories from "./Categories";
 import NewArrival from "./NewArrivals";
 import PromoBanner from "./PromoBanner";
+import BestSeller from "./BestSeller";
 import CounDown from "./Countdown";
 import Testimonials from "./Testimonials";
 import Newsletter from "../Common/Newsletter";
@@ -11,11 +11,11 @@ import Newsletter from "../Common/Newsletter";
 const Home = () => {
   return (
     <main>
-      <HeroBanner />
-      <PlayModes />
-      {/* <Categories /> */}
+      <Hero />
+      <Categories />
       <NewArrival />
       <PromoBanner />
+      <BestSeller />
       {/* <CounDown /> */}
       <Testimonials />
       <Newsletter />

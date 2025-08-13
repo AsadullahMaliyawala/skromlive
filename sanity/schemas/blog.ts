@@ -25,7 +25,7 @@ export const blogSchema = defineType({
       name: 'author',
       title: 'Author',
       type: 'reference',
-      to: { type: 'author' },
+      to: [{ type: 'author' }],
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -64,7 +64,6 @@ export const blogSchema = defineType({
       name: 'excerpt',
       title: 'Excerpt',
       type: 'text',
-      rows: 4,
     }),
     defineField({
       name: 'body',

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { client } from '@/../sanity/client'
 import * as queries from '@/../sanity/queries'
-import { convertSanityProduct } from '@/lib/sanity-api/sanity-helpers'
+import { convertSanityProduct } from '@/lib/sanity-helpers'
 
 export async function GET() {
   try {

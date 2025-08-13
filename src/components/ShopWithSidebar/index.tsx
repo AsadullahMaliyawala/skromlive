@@ -87,8 +87,11 @@ const ShopWithSidebar = () => {
 
     // closing sidebar while clicking outside
     function handleClickOutside(event: MouseEvent) {
-      if (!event.target.closest(".sidebar-content")) {
-        setProductSidebar(false);
+      const target = event.target as Node | null;
+      if (target instanceof Element) {
+        if (!target.closest(".sidebar-content")) {
+          setProductSidebar(false);
+        }
       }
     }
 

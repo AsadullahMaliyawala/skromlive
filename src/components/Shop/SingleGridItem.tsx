@@ -25,6 +25,7 @@ const SingleGridItem = ({ item }: { item: Product }) => {
     dispatch(
       addItemToCart({
         ...item,
+        id: item.id || parseInt(item._id || '0'), // Ensure id is present and is a number
         quantity: 1,
       })
     );

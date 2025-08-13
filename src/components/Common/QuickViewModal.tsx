@@ -34,6 +34,7 @@ const QuickViewModal = () => {
     dispatch(
       addItemToCart({
         ...product,
+        id: product.id || parseInt(product._id || '0'), // Ensure id is present and is a number
         quantity,
       })
     );

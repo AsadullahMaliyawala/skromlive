@@ -52,7 +52,7 @@ export const blogSchema = defineType({
           { title: 'Health', value: 'health' },
         ],
       },
-    }),
+    } as any),
     defineField({
       name: 'publishedAt',
       title: 'Published at',
@@ -81,7 +81,7 @@ export const blogSchema = defineType({
       title: 'Tags',
       type: 'array',
       of: [{ type: 'string' }],
-    }),
+    } as any),
   ],
 
   preview: {
@@ -144,4 +144,4 @@ export const blockContentSchema = defineType({
       options: { hotspot: true },
     },
   ],
-})
+} as any)

@@ -51,14 +51,14 @@ export const productSchema = defineType({
       type: 'array',
       of: [{ type: 'image' }],
       validation: (Rule) => Rule.max(4),
-    }),
+    } as any),
     defineField({
       name: 'previews',
       title: 'Preview Images',
       type: 'array',
       of: [{ type: 'image' }],
       validation: (Rule) => Rule.max(6),
-    }),
+    } as any),
     defineField({
       name: 'stock',
       title: 'Stock Quantity',
@@ -76,7 +76,7 @@ export const productSchema = defineType({
       title: 'Tags',
       type: 'array',
       of: [{ type: 'string' }],
-    }),
+    } as any),
     defineField({
       name: 'additionalInformation',
       title: 'Additional Information',
@@ -98,7 +98,7 @@ export const productSchema = defineType({
           ],
         },
       ],
-    }),
+    } as any),
   ],
   preview: {
     select: {

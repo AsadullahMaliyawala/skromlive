@@ -5,9 +5,10 @@ import { authOptions } from '../auth/options'
 
 export async function GET() {
   const session = await getServerSession(authOptions as any)
-  if (!session?.user?.id) return NextResponse.json({ items: [] })
+  if (!(session as any)?.user?.id) return NextResponse.json({ items: [] })
+  const userId = (session as any).user.id
   const cart = await prisma.cart.findUnique({
-    where: { userId: session.user.id },
+    where: { userId },
     include: { items: true },
   })
   return NextResponse.json({ items: cart?.items ?? [] })

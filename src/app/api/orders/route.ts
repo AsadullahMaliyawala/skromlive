@@ -5,9 +5,10 @@ import { authOptions } from '../auth/options'
 
 export async function GET() {
   const session = await getServerSession(authOptions as any)
-  if (!session?.user?.id) return NextResponse.json({ orders: [] })
+  if (!(session as any)?.user?.id) return NextResponse.json({ orders: [] })
+  const userId = (session as any).user.id
   const orders = await prisma.order.findMany({
-    where: { userId: session.user.id },
+    where: { userId },
     include: { items: true },
     orderBy: { createdAt: 'desc' },
   })

@@ -5,10 +5,11 @@ import { authOptions } from '../../auth/options'
 
 export async function POST() {
   const session = await getServerSession(authOptions as any)
-  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!(session as any)?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const userId = (session as any).user.id
   const cart = await prisma.cart.findUnique({
-    where: { userId: session.user.id },
+    where: { userId },
     include: { items: true },
   })
   if (!cart || cart.items.length === 0)
@@ -22,7 +23,7 @@ export async function POST() {
   const order = await prisma.$transaction(async (tx) => {
     const created = await tx.order.create({
       data: {
-        userId: session.user.id,
+        userId,
         subtotal,
         shipping,
         tax,

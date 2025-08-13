@@ -66,9 +66,7 @@ const MyAccount = () => {
                     <p className="font-medium text-dark mb-0.5">
                       {session?.user?.name || session?.user?.email || "User"}
                     </p>
-                    <p className="text-custom-xs">
-                      Member Since {session?.user?.createdAt ? new Date(session.user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Recently'}
-                    </p>
+                    <p className="text-custom-xs">Member Since Recently</p>
                   </div>
                 </div>
 

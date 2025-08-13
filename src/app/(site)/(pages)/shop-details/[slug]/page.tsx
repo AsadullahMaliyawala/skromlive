@@ -5,9 +5,9 @@ import { getProductBySlug } from "@/lib/sanity-api";
 import { notFound } from "next/navigation";
 
 interface ShopDetailsPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: ShopDetailsPageProps): Promise<Metadata> {

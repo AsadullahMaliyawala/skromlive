@@ -10,6 +10,14 @@ import staticBlogData from '@/components/BlogGrid/blogData'
 // Products API
 export async function getAllProducts(): Promise<Product[]> {
   try {
+    // Try server-side route first to avoid client-side CORS in production
+    if (typeof window !== 'undefined') {
+      const res = await fetch('/api/sanity/products', { cache: 'no-store' })
+      if (res.ok) {
+        const data = await res.json()
+        return data as Product[]
+      }
+    }
     const products = await client.fetch(queries.getAllProducts)
     return products.map(convertSanityProduct)
   } catch (error) {

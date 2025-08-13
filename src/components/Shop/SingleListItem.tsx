@@ -37,9 +37,13 @@ const SingleListItem = ({ item }: { item: Product }) => {
   const handleItemToWishList = () => {
     dispatch(
       addItemToWishlist({
-        ...item,
-        status: "available",
+        id: item.id || parseInt(item._id || '0'), // Ensure id is present and is a number
+        title: item.title,
+        price: item.price,
+        discountedPrice: item.discountedPrice || item.price, // Ensure discountedPrice is present
         quantity: 1,
+        status: "available",
+        imgs: item.imgs,
       })
     );
   };

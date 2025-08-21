@@ -161,14 +161,11 @@ const ShopDetails = ({ product: productProp }: ShopDetailsProps) => {
                       {product.title}
                     </h2>
 
-                    <div className="inline-flex font-medium text-custom-sm text-white bg-blue rounded py-0.5 px-2.5">
-                      30% OFF
-                    </div>
+                    <div className="hidden"></div>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-5.5 mb-4.5">
-                    <div className="flex items-center gap-2.5">
-                      {/* <!-- stars --> */}
+                    <div className="hidden">
                       <div className="flex items-center gap-1">
                         <svg
                           className="fill-[#FFA645]"
@@ -276,7 +273,7 @@ const ShopDetails = ({ product: productProp }: ShopDetailsProps) => {
                         </svg>
                       </div>
 
-                      <span> (5 customer reviews) </span>
+                      <span></span>
                     </div>
 
                     <div className="flex items-center gap-1.5">
@@ -304,7 +301,9 @@ const ShopDetails = ({ product: productProp }: ShopDetailsProps) => {
                         </defs>
                       </svg>
 
-                      <span className="text-green"> In Stock </span>
+                      <span className={(product.stock ?? 0) > 0 ? "text-green" : "text-red"}>
+                        {(product.stock ?? 0) > 0 ? "In Stock" : "Out of Stock"}
+                      </span>
                     </div>
                   </div>
 

@@ -12,6 +12,9 @@ datasource db {
 model User {
   id        String   @id @default(cuid())
   name      String?
+  firstName String?
+  lastName  String?
+  country   String?  @default("0") // Default to Australia
   email     String   @unique
   password  String   // bcrypt hash
   image     String?

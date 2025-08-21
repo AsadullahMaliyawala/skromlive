@@ -8,6 +8,7 @@ import { addItemToWishlist } from "@/redux/features/wishlist-slice";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import Image from "next/image";
 
 const SingleGridItem = ({ item }: { item: Product }) => {
@@ -32,6 +33,7 @@ const SingleGridItem = ({ item }: { item: Product }) => {
         imgs: item.imgs,
       })
     );
+    toast.success("Added to cart");
   };
 
   const handleItemToWishList = () => {
@@ -42,10 +44,12 @@ const SingleGridItem = ({ item }: { item: Product }) => {
         price: item.price,
         discountedPrice: item.discountedPrice || item.price, // Ensure discountedPrice is present
         quantity: 1,
-        status: "available",
+        status: (item.stock ?? 0) > 0 ? "available" : "out-of-stock",
+        stock: item.stock,
         imgs: item.imgs,
       })
     );
+    toast.success("Added to wishlist");
   };
 
   return (

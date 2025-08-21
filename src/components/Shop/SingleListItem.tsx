@@ -10,6 +10,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import Link from "next/link";
 import Image from "next/image";
+import toast from "react-hot-toast";
 
 const SingleListItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
@@ -32,6 +33,7 @@ const SingleListItem = ({ item }: { item: Product }) => {
         imgs: item.imgs,
       })
     );
+    toast.success("Added to cart");
   };
 
   const handleItemToWishList = () => {
@@ -42,10 +44,12 @@ const SingleListItem = ({ item }: { item: Product }) => {
         price: item.price,
         discountedPrice: item.discountedPrice || item.price, // Ensure discountedPrice is present
         quantity: 1,
-        status: "available",
+        status: (item.stock ?? 0) > 0 ? "available" : "out-of-stock",
+        stock: item.stock,
         imgs: item.imgs,
       })
     );
+    toast.success("Added to wishlist");
   };
 
   return (

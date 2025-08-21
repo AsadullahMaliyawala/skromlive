@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-const AddressModal = ({ isOpen, closeModal }) => {
+const AddressModal = ({ isOpen, closeModal, type = 'SHIPPING' }) => {
   useEffect(() => {
     // closing modal while clicking outside
     function handleClickOutside(event) {
@@ -52,7 +52,42 @@ const AddressModal = ({ isOpen, closeModal }) => {
           </button>
 
           <div>
-            <form>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const form = e.currentTarget as HTMLFormElement;
+                const formData = new FormData(form);
+                const payload = {
+                  fullName: formData.get('name') as string,
+                  email: formData.get('email') as string,
+                  phone: formData.get('phone') as string,
+                  line1: formData.get('address') as string,
+                  city: formData.get('city') as string,
+                  state: formData.get('state') as string,
+                  postal: formData.get('postal') as string,
+                  country: formData.get('country') as string,
+                  type,
+                } as any;
+                
+                try {
+                  const response = await fetch('/api/account/address', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                  });
+                  
+                  if (response.ok) {
+                    alert('Address saved successfully!');
+                    closeModal();
+                  } else {
+                    const error = await response.json();
+                    alert(error.error || 'Failed to save address');
+                  }
+                } catch (error) {
+                  alert('Error saving address');
+                }
+              }}
+            >
               <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
                 <div className="w-full">
                   <label htmlFor="name" className="block mb-2.5">
@@ -62,7 +97,7 @@ const AddressModal = ({ isOpen, closeModal }) => {
                   <input
                     type="text"
                     name="name"
-                    value="James Septimus"
+                    defaultValue=""
                     className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                   />
                 </div>
@@ -75,7 +110,7 @@ const AddressModal = ({ isOpen, closeModal }) => {
                   <input
                     type="email"
                     name="email"
-                    value="jamse@example.com"
+                    defaultValue=""
                     className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                   />
                 </div>
@@ -90,7 +125,7 @@ const AddressModal = ({ isOpen, closeModal }) => {
                   <input
                     type="text"
                     name="phone"
-                    value="1234 567890"
+                    defaultValue=""
                     className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                   />
                 </div>
@@ -103,9 +138,39 @@ const AddressModal = ({ isOpen, closeModal }) => {
                   <input
                     type="text"
                     name="address"
-                    value="7398 Smoke Ranch RoadLas Vegas, Nevada 89128"
+                    defaultValue=""
                     className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                   />
+                </div>
+              </div>
+
+              <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
+                <div className="w-full">
+                  <label htmlFor="city" className="block mb-2.5">
+                    City
+                  </label>
+                  <input type="text" name="city" defaultValue="" className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20" />
+                </div>
+                <div className="w-full">
+                  <label htmlFor="state" className="block mb-2.5">
+                    State
+                  </label>
+                  <input type="text" name="state" defaultValue="" className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20" />
+                </div>
+              </div>
+
+              <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
+                <div className="w-full">
+                  <label htmlFor="postal" className="block mb-2.5">
+                    Postal Code
+                  </label>
+                  <input type="text" name="postal" defaultValue="" className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20" />
+                </div>
+                <div className="w-full">
+                  <label htmlFor="country" className="block mb-2.5">
+                    Country
+                  </label>
+                  <input type="text" name="country" defaultValue="" className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20" />
                 </div>
               </div>
 

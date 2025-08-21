@@ -25,11 +25,13 @@ const SingleOrder = ({ orderItem, smallView }: any) => {
         <div className="items-center justify-between border-t border-gray-3 py-5 px-7.5 hidden md:flex">
           <div className="min-w-[111px]">
             <p className="text-custom-sm text-red">
-              #{orderItem.orderId.slice(-8)}
+              #{orderItem.id?.slice(-8) || orderItem.orderId?.slice(-8) || 'N/A'}
             </p>
           </div>
           <div className="min-w-[175px]">
-            <p className="text-custom-sm text-dark">{orderItem.createdAt}</p>
+            <p className="text-custom-sm text-dark">
+              {orderItem.createdAt ? new Date(orderItem.createdAt).toLocaleDateString() : 'N/A'}
+            </p>
           </div>
 
           <div className="min-w-[128px]">
@@ -49,11 +51,18 @@ const SingleOrder = ({ orderItem, smallView }: any) => {
           </div>
 
           <div className="min-w-[213px]">
-            <p className="text-custom-sm text-dark">{orderItem.title}</p>
+            <p className="text-custom-sm text-dark">
+              {orderItem.items?.length ? 
+                `${orderItem.items.length} item${orderItem.items.length > 1 ? 's' : ''}` : 
+                orderItem.title || 'N/A'
+              }
+            </p>
           </div>
 
           <div className="min-w-[113px]">
-            <p className="text-custom-sm text-dark">{orderItem.total}</p>
+            <p className="text-custom-sm text-dark">
+              ${orderItem.total || orderItem.total === 0 ? Number(orderItem.total).toFixed(2) : '0.00'}
+            </p>
           </div>
 
           <div className="flex gap-5 items-center">
@@ -71,13 +80,13 @@ const SingleOrder = ({ orderItem, smallView }: any) => {
             <div className="">
               <p className="text-custom-sm text-dark">
                 <span className="font-bold pr-2"> Order:</span> #
-                {orderItem.orderId.slice(-8)}
+                {orderItem.id?.slice(-8) || orderItem.orderId?.slice(-8) || 'N/A'}
               </p>
             </div>
             <div className="">
               <p className="text-custom-sm text-dark">
                 <span className="font-bold pr-2">Date:</span>{" "}
-                {orderItem.createdAt}
+                {orderItem.createdAt ? new Date(orderItem.createdAt).toLocaleDateString() : 'N/A'}
               </p>
             </div>
 
@@ -102,14 +111,18 @@ const SingleOrder = ({ orderItem, smallView }: any) => {
 
             <div className="">
               <p className="text-custom-sm text-dark">
-                <span className="font-bold pr-2">Title:</span> {orderItem.title}
+                <span className="font-bold pr-2">Items:</span> 
+                {orderItem.items?.length ? 
+                  `${orderItem.items.length} item${orderItem.items.length > 1 ? 's' : ''}` : 
+                  orderItem.title || 'N/A'
+                }
               </p>
             </div>
 
             <div className="">
               <p className="text-custom-sm text-dark">
                 <span className="font-bold pr-2">Total:</span> $
-                {orderItem.total}
+                {orderItem.total || orderItem.total === 0 ? Number(orderItem.total).toFixed(2) : '0.00'}
               </p>
             </div>
 

@@ -1,7 +1,18 @@
 import React, { useState } from "react";
+import { useSession } from "next-auth/react";
 
 const Login = () => {
   const [dropdown, setDropdown] = useState(false);
+  const { status, data: session } = useSession();
+
+  // If the user is authenticated, hide the login accordion and show a small note instead
+  if (status === "authenticated") {
+    return (
+      <div className="bg-white shadow-1 rounded-[10px] p-5.5">
+        <p className="text-dark">Logged in as {session?.user?.email}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white shadow-1 rounded-[10px]">

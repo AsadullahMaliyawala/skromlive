@@ -1,9 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 import { useModalContext } from "@/app/context/QuickViewModalContext";
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import { addItemToCart } from "@/redux/features/cart-slice";
+import { addItemToWishlist } from "@/redux/features/wishlist-slice";
 import { useDispatch } from "react-redux";
 import Image from "next/image";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
@@ -24,6 +26,7 @@ const QuickViewModal = () => {
 
   // preview modal
   const handlePreviewSlider = () => {
+    if (!product) return;
     dispatch(updateproductDetails(product));
 
     openPreviewModal();
@@ -31,25 +34,47 @@ const QuickViewModal = () => {
 
   // add to cart
   const handleAddToCart = () => {
+    if (!product) return;
     dispatch(
       addItemToCart({
-        id: product.id || parseInt(product._id || '0'), // Ensure id is present and is a number
+        id: product.id || parseInt(product._id || "0"),
         title: product.title,
         price: product.price,
-        discountedPrice: product.discountedPrice || product.price, // Ensure discountedPrice is present
+        discountedPrice: product.discountedPrice || product.price,
         quantity,
         imgs: product.imgs,
       })
     );
 
+    toast.success("Added to cart");
     closeModal();
+  };
+
+  const handleAddToWishlist = () => {
+    if (!product) return;
+    dispatch(
+      addItemToWishlist({
+        id: product.id || parseInt(product._id || "0"),
+        title: product.title,
+        price: product.price,
+        discountedPrice: product.discountedPrice || product.price,
+        quantity: 1,
+        status: (product.stock ?? 0) > 0 ? "available" : "out-of-stock",
+        imgs: product.imgs,
+      })
+    );
+
+    toast.success("Added to wishlist");
   };
 
   useEffect(() => {
     // closing modal while clicking outside
-    function handleClickOutside(event) {
-      if (!event.target.closest(".modal-content")) {
-        closeModal();
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node | null;
+      if (target instanceof Element) {
+        if (!target.closest(".modal-content")) {
+          closeModal();
+        }
       }
     }
 
@@ -98,7 +123,7 @@ const QuickViewModal = () => {
             <div className="max-w-[526px] w-full">
               <div className="flex gap-5">
                 <div className="flex flex-col gap-5">
-                  {product.imgs.thumbnails?.map((img, key) => (
+                  {(product?.imgs?.thumbnails || product?.thumbnails || []).map((img: string, key: number) => (
                     <button
                       onClick={() => setActivePreview(key)}
                       key={key}
@@ -107,7 +132,7 @@ const QuickViewModal = () => {
                       }`}
                     >
                       <Image
-                        src={img || ""}
+                        src={img || "/images/placeholder.jpg"}
                         alt="thumbnail"
                         width={61}
                         height={61}
@@ -118,7 +143,7 @@ const QuickViewModal = () => {
                 </div>
 
                 <div className="relative z-1 overflow-hidden flex items-center justify-center w-full sm:min-h-[508px] bg-gray-1 rounded-lg border border-gray-3">
-                  <div>
+                  <div className="w-full h-full flex items-center justify-center">
                     <button
                       onClick={handlePreviewSlider}
                       aria-label="button for zoom"
@@ -140,29 +165,30 @@ const QuickViewModal = () => {
                         />
                       </svg>
                     </button>
-                    ABC
-                    {/* <Image
-                      src={product?.imgs?.previews?.[activePreview]}
-                      alt="products-details"
-                      width={400}
-                      height={400}
-                    /> */}
+                    <Image
+                      src={
+                        (product?.imgs?.previews || product?.previews || [])[activePreview] ||
+                        (product?.imgs?.thumbnails || product?.thumbnails || [])[activePreview] ||
+                        "/images/placeholder.jpg"
+                      }
+                      alt={product?.title || "Product preview"}
+                      width={500}
+                      height={500}
+                    />
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="max-w-[445px] w-full">
-              <span className="inline-block text-custom-xs font-medium text-white py-1 px-3 bg-green mb-6.5">
-                SALE 20% OFF
-              </span>
+
 
               <h3 className="font-semibold text-xl xl:text-heading-5 text-dark mb-4">
-                {product.title}
+                {product?.title}
               </h3>
 
               <div className="flex flex-wrap items-center gap-5 mb-6">
-                <div className="flex items-center gap-1.5">
+                <div className="hidden">
                   {/* <!-- stars --> */}
                   <div className="flex items-center gap-1">
                     <svg
@@ -278,38 +304,33 @@ const QuickViewModal = () => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <g clipPath="url(#clip0_375_9221)">
-                      <path
-                        d="M10 0.5625C4.78125 0.5625 0.5625 4.78125 0.5625 10C0.5625 15.2188 4.78125 19.4688 10 19.4688C15.2188 19.4688 19.4688 15.2188 19.4688 10C19.4688 4.78125 15.2188 0.5625 10 0.5625ZM10 18.0625C5.5625 18.0625 1.96875 14.4375 1.96875 10C1.96875 5.5625 5.5625 1.96875 10 1.96875C14.4375 1.96875 18.0625 5.59375 18.0625 10.0312C18.0625 14.4375 14.4375 18.0625 10 18.0625Z"
-                        fill="#22AD5C"
-                      />
-                      <path
-                        d="M12.6875 7.09374L8.9688 10.7187L7.2813 9.06249C7.00005 8.78124 6.56255 8.81249 6.2813 9.06249C6.00005 9.34374 6.0313 9.78124 6.2813 10.0625L8.2813 12C8.4688 12.1875 8.7188 12.2812 8.9688 12.2812C9.2188 12.2812 9.4688 12.1875 9.6563 12L13.6875 8.12499C13.9688 7.84374 13.9688 7.40624 13.6875 7.12499C13.4063 6.84374 12.9688 6.84374 12.6875 7.09374Z"
-                        fill="#22AD5C"
-                      />
-                    </g>
-                    <defs>
-                      <clipPath id="clip0_375_9221">
-                        <rect width="20" height="20" fill="white" />
-                      </clipPath>
-                    </defs>
-                  </svg>
-
-                  <span className="font-medium text-dark"> In Stock </span>
+                  {(() => {
+                    const inStock = (product?.stock ?? 0) > 0;
+                    return (
+                      <>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <g clipPath="url(#clip0_375_9221)">
+                            <path d="M10 0.5625C4.78125 0.5625 0.5625 4.78125 0.5625 10C0.5625 15.2188 4.78125 19.4688 10 19.4688C15.2188 19.4688 19.4688 15.2188 19.4688 10C19.4688 4.78125 15.2188 0.5625 10 0.5625ZM10 18.0625C5.5625 18.0625 1.96875 14.4375 1.96875 10C1.96875 5.5625 5.5625 1.96875 10 1.96875C14.4375 1.96875 18.0625 5.59375 18.0625 10.0312C18.0625 14.4375 14.4375 18.0625 10 18.0625Z" fill={inStock ? "#22AD5C" : "#F23030"} />
+                            {inStock ? (
+                              <path d="M12.6875 7.09374L8.9688 10.7187L7.2813 9.06249C7.00005 8.78124 6.56255 8.81249 6.2813 9.06249C6.00005 9.34374 6.0313 9.78124 6.2813 10.0625L8.2813 12C8.4688 12.1875 8.7188 12.2812 8.9688 12.2812C9.2188 12.2812 9.4688 12.1875 9.6563 12L13.6875 8.12499C13.9688 7.84374 13.9688 7.40624 13.6875 7.12499C13.4063 6.84374 12.9688 6.84374 12.6875 7.09374Z" fill="#22AD5C" />
+                            ) : (
+                              <path d="M9.99935 14.7917C10.3445 14.7917 10.6243 14.5119 10.6243 14.1667V9.16669C10.6243 8.82151 10.3445 8.54169 9.99935 8.54169C9.65417 8.54169 9.37435 8.82151 9.37435 9.16669V14.1667C9.37435 14.5119 9.65417 14.7917 9.99935 14.7917Z" fill="#F23030" />
+                            )}
+                          </g>
+                          <defs>
+                            <clipPath id="clip0_375_9221">
+                              <rect width="20" height="20" fill="white" />
+                            </clipPath>
+                          </defs>
+                        </svg>
+                        <span className={inStock ? "font-medium text-dark" : "text-red"}>{inStock ? "In Stock" : "Out of Stock"}</span>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
 
-              <p>
-                Lorem Ipsum is simply dummy text of the printing and typesetting
-                industry. Lorem Ipsum has.
-              </p>
+              {product?.description && <p>{product.description}</p>}
 
               <div className="flex flex-wrap justify-between gap-5 mt-6 mb-7.5">
                 <div>
@@ -319,10 +340,10 @@ const QuickViewModal = () => {
 
                   <span className="flex items-center gap-2">
                     <span className="font-semibold text-dark text-xl xl:text-heading-4">
-                      ${product.discountedPrice}
+                      ${product?.discountedPrice}
                     </span>
                     <span className="font-medium text-dark-4 text-lg xl:text-2xl line-through">
-                      ${product.price}
+                      ${product?.price}
                     </span>
                   </span>
                 </div>
@@ -405,6 +426,7 @@ const QuickViewModal = () => {
                 </button>
 
                 <button
+                  onClick={handleAddToWishlist}
                   className={`inline-flex items-center gap-2 font-medium text-white bg-dark py-3 px-6 rounded-md ease-out duration-200 hover:bg-opacity-95 `}
                 >
                   <svg

@@ -6,9 +6,15 @@ import Shipping from "./Shipping";
 import ShippingMethod from "./ShippingMethod";
 import PaymentMethod from "./PaymentMethod";
 import Coupon from "./Coupon";
+import { useAppSelector } from "@/redux/store";
+import { useSelector } from "react-redux";
+import { selectTotalPrice } from "@/redux/features/cart-slice";
 import Billing from "./Billing";
 
 const Checkout = () => {
+  const cartItems = useAppSelector((state) => state.cartReducer.items);
+  const totalPrice = useSelector(selectTotalPrice);
+
   return (
     <>
       <Breadcrumb title={"Checkout"} pages={["checkout"]} />
@@ -68,45 +74,16 @@ const Checkout = () => {
                       </div>
                     </div>
 
-                    {/* <!-- product item --> */}
-                    <div className="flex items-center justify-between py-5 border-b border-gray-3">
-                      <div>
-                        <p className="text-dark">iPhone 14 Plus , 6/128GB</p>
+                    {cartItems.map((item, key) => (
+                      <div key={key} className="flex items-center justify-between py-5 border-b border-gray-3">
+                        <div>
+                          <p className="text-dark">{item.title}</p>
+                        </div>
+                        <div>
+                          <p className="text-dark text-right">${item.discountedPrice * item.quantity}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-dark text-right">$899.00</p>
-                      </div>
-                    </div>
-
-                    {/* <!-- product item --> */}
-                    <div className="flex items-center justify-between py-5 border-b border-gray-3">
-                      <div>
-                        <p className="text-dark">Asus RT Dual Band Router</p>
-                      </div>
-                      <div>
-                        <p className="text-dark text-right">$129.00</p>
-                      </div>
-                    </div>
-
-                    {/* <!-- product item --> */}
-                    <div className="flex items-center justify-between py-5 border-b border-gray-3">
-                      <div>
-                        <p className="text-dark">Havit HV-G69 USB Gamepad</p>
-                      </div>
-                      <div>
-                        <p className="text-dark text-right">$29.00</p>
-                      </div>
-                    </div>
-
-                    {/* <!-- product item --> */}
-                    <div className="flex items-center justify-between py-5 border-b border-gray-3">
-                      <div>
-                        <p className="text-dark">Shipping Fee</p>
-                      </div>
-                      <div>
-                        <p className="text-dark text-right">$15.00</p>
-                      </div>
-                    </div>
+                    ))}
 
                     {/* <!-- total --> */}
                     <div className="flex items-center justify-between pt-5">
@@ -114,9 +91,7 @@ const Checkout = () => {
                         <p className="font-medium text-lg text-dark">Total</p>
                       </div>
                       <div>
-                        <p className="font-medium text-lg text-dark text-right">
-                          $1072.00
-                        </p>
+                        <p className="font-medium text-lg text-dark text-right">${totalPrice}</p>
                       </div>
                     </div>
                   </div>

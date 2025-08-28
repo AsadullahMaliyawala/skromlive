@@ -51,6 +51,12 @@ const SingleItem = ({ item }: { item: Product }) => {
     toast.success("Added to wishlist");
   };
 
+  const imageSrc =
+    item.thumbnails?.[0] ||
+    item.imgs?.previews?.[0] ||
+    item.imgs?.thumbnails?.[0] ||
+    "/images/placeholder.jpg";
+
   return (
     <div className="group">
       <div className="relative overflow-hidden rounded-lg bg-[#F6F7FB] min-h-[403px]">
@@ -89,7 +95,7 @@ const SingleItem = ({ item }: { item: Product }) => {
               />
             </div>
 
-            <p className="text-custom-sm">({item.reviews})</p>
+            <p className="text-custom-sm">({item.reviews || 0})</p>
           </div>
 
           <h3 className="font-medium text-dark ease-out duration-200 hover:text-blue mb-1.5">
@@ -97,13 +103,15 @@ const SingleItem = ({ item }: { item: Product }) => {
           </h3>
 
           <span className="flex items-center justify-center gap-2 font-medium text-lg">
-            <span className="text-dark">${item.discountedPrice}</span>
-            <span className="text-dark-4 line-through">${item.price}</span>
+            <span className="text-dark">${item.discountedPrice || item.price}</span>
+            {item.discountedPrice && item.discountedPrice !== item.price && (
+              <span className="text-dark-4 line-through">${item.price}</span>
+            )}
           </span>
         </div>
 
         <div className="flex justify-center items-center">
-          {/* <Image src={item.imgs.previews[0]} alt="" width={280} height={280} /> */}
+          <Image src={imageSrc} alt={item.title} width={280} height={280} />
         </div>
 
         <div className="absolute right-0 bottom-0 translate-x-full u-w-full flex flex-col gap-2 p-5.5 ease-linear duration-300 group-hover:translate-x-0">

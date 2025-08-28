@@ -1,10 +1,32 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import SingleItem from "./SingleItem";
 import Image from "next/image";
 import Link from "next/link";
-import shopData from "@/components/Shop/shopData";
+import { getAllProducts } from "@/lib/sanity-api";
+import { Product } from "@/types/product";
 
 const BestSeller = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const data = await getAllProducts();
+        if (mounted) setProducts(data.slice(0, 6)); // Show 6 best seller products
+      } catch (e) {
+        console.error("Failed to load products", e);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
     <section className="overflow-hidden">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
@@ -28,9 +50,15 @@ const BestSeller = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7.5">
           {/* <!-- Best Sellers item --> */}
-          {shopData.slice(1, 7).map((item, key) => (
-            <SingleItem item={item} key={key} />
-          ))}
+          {loading ? (
+            <div className="col-span-full text-center py-10">Loading…</div>
+          ) : products.length ? (
+            products.map((item, key) => (
+              <SingleItem item={item} key={key} />
+            ))
+          ) : (
+            <div className="col-span-full text-center py-10">No products found</div>
+          )}
         </div>
 
         <div className="text-center mt-12.5">

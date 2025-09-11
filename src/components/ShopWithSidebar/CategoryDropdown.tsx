@@ -1,24 +1,32 @@
 "use client";
 
 import { useState } from "react";
+import { Category } from "@/types/category";
+import { Product } from "@/types/product";
 
-const CategoryItem = ({ category }) => {
-  const [selected, setSelected] = useState(false);
+interface CategoryItemProps {
+  category: Category;
+  isSelected: boolean;
+  productCount: number;
+  onToggle: (categoryId: string) => void;
+}
+
+const CategoryItem = ({ category, isSelected, productCount, onToggle }: CategoryItemProps) => {
   return (
     <button
       className={`${
-        selected && "text-blue"
+        isSelected && "text-blue"
       } group flex items-center justify-between ease-out duration-200 hover:text-blue `}
-      onClick={() => setSelected(!selected)}
+      onClick={() => onToggle(category._id)}
     >
       <div className="flex items-center gap-2">
         <div
           className={`cursor-pointer flex items-center justify-center rounded w-4 h-4 border ${
-            selected ? "border-blue bg-blue" : "bg-white border-gray-3"
+            isSelected ? "border-blue bg-blue" : "bg-white border-gray-3"
           }`}
         >
           <svg
-            className={selected ? "block" : "hidden"}
+            className={isSelected ? "block" : "hidden"}
             width="10"
             height="10"
             viewBox="0 0 10 10"
@@ -40,17 +48,39 @@ const CategoryItem = ({ category }) => {
 
       <span
         className={`${
-          selected ? "text-white bg-blue" : "bg-gray-2"
+          isSelected ? "text-white bg-blue" : "bg-gray-2"
         } inline-flex rounded-[30px] text-custom-xs px-2 ease-out duration-200 group-hover:text-white group-hover:bg-blue`}
       >
-        {category.products}
+        {productCount}
       </span>
     </button>
   );
 };
 
-const CategoryDropdown = ({ categories }) => {
+interface CategoryDropdownProps {
+  categories: Category[];
+  selectedCategories: string[];
+  onCategoryChange: (categories: string[]) => void;
+  allProducts: Product[];
+}
+
+const CategoryDropdown = ({ categories, selectedCategories, onCategoryChange, allProducts }: CategoryDropdownProps) => {
   const [toggleDropdown, setToggleDropdown] = useState(true);
+
+  const handleCategoryToggle = (categoryId: string) => {
+    const isSelected = selectedCategories.includes(categoryId);
+    if (isSelected) {
+      onCategoryChange(selectedCategories.filter(id => id !== categoryId));
+    } else {
+      onCategoryChange([...selectedCategories, categoryId]);
+    }
+  };
+
+  const getProductCountForCategory = (categoryId: string) => {
+    return allProducts.filter(product => 
+      product.category && product.category._id === categoryId
+    ).length;
+  };
 
   return (
     <div className="bg-white shadow-1 rounded-lg">
@@ -95,8 +125,14 @@ const CategoryDropdown = ({ categories }) => {
           toggleDropdown ? "flex" : "hidden"
         }`}
       >
-        {categories.map((category, key) => (
-          <CategoryItem key={key} category={category} />
+        {categories.map((category) => (
+          <CategoryItem 
+            key={category._id} 
+            category={category}
+            isSelected={selectedCategories.includes(category._id)}
+            productCount={getProductCountForCategory(category._id)}
+            onToggle={handleCategoryToggle}
+          />
         ))}
       </div>
     </div>

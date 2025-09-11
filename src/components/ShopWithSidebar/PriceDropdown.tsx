@@ -1,14 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import RangeSlider from 'react-range-slider-input';
 import 'react-range-slider-input/dist/style.css';
+import { Product } from '@/types/product';
 
-const PriceDropdown = () => {
+interface PriceDropdownProps {
+  products: Product[];
+  priceRange: { min: number; max: number };
+  onPriceRangeChange: (range: { min: number; max: number }) => void;
+}
+
+const PriceDropdown = ({ products, priceRange, onPriceRangeChange }: PriceDropdownProps) => {
   const [toggleDropdown, setToggleDropdown] = useState(true);
+
+  // find maximum product price dynamically
+  const maxProductPrice = products.length > 0 ? Math.max(...products.map(p => p.discountedPrice || p.price)) : 1000;
 
   const [selectedPrice, setSelectedPrice] = useState({
     from: 0,
-    to: 100,
+    to: priceRange.max,
   });
+
+  // Sync selectedPrice with priceRange prop changes
+  useEffect(() => {
+    setSelectedPrice({
+      from: 0,
+      to: priceRange.max,
+    });
+  }, [priceRange]);
 
   return (
     <div className="bg-white shadow-1 rounded-lg">
@@ -18,12 +36,13 @@ const PriceDropdown = () => {
       >
         <p className="text-dark">Price</p>
         <button
-          onClick={() => setToggleDropdown(!toggleDropdown)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setToggleDropdown(!toggleDropdown);
+          }}
           id="price-dropdown-btn"
           aria-label="button for price dropdown"
-          className={`text-dark ease-out duration-200 ${
-            toggleDropdown && 'rotate-180'
-          }`}
+          className={`text-dark ease-out duration-200 ${toggleDropdown && 'rotate-180'}`}
         >
           <svg
             className="fill-current"
@@ -43,43 +62,103 @@ const PriceDropdown = () => {
         </button>
       </div>
 
-      {/* // <!-- dropdown menu --> */}
-      <div className={`p-6 ${toggleDropdown ? 'block' : 'hidden'}`}>
+      {/* dropdown menu */}
+      <div className={`p-6 border-t border-gray-2 ${toggleDropdown ? 'block' : 'hidden'}`}>
         <div id="pricingOne">
           <div className="price-range">
             <RangeSlider
               id="range-slider-gradient"
               className="margin-lg"
-              step={'any'}
-              onInput={(e) =>
-                setSelectedPrice({
-                  from: Math.floor(e[0]),
-                  to: Math.ceil(e[1]),
-                })
-              }
+              min={0}
+              max={maxProductPrice}
+              step={1}
+              value={[selectedPrice.from, selectedPrice.to]}
+              onInput={(values) => {
+                if (Array.isArray(values) && values.length === 2) {
+                  const newRange = {
+                    from: Math.floor(Number(values[0])),
+                    to: Math.ceil(Number(values[1])),
+                  };
+                  setSelectedPrice(newRange);
+                  onPriceRangeChange({ min: newRange.from, max: newRange.to });
+                }
+              }}
             />
 
             <div className="price-amount flex items-center justify-between pt-4">
               <div className="text-custom-xs text-dark-4 flex rounded border border-gray-3/80">
-                <span className="block border-r border-gray-3/80 px-2.5 py-1.5">
+                <span className="block border-r border-gray-3/80 px-2.5 py-1.5 bg-gray-1">
                   $
                 </span>
-                <span id="minAmount" className="block px-3 py-1.5">
-                  {selectedPrice.from}
-                </span>
+                <input
+                  type="number"
+                  min={0}
+                  max={selectedPrice.to - 1}
+                  value={selectedPrice.from}
+                  onChange={(e) => {
+                    const newFrom = Math.max(0, Math.min(Number(e.target.value), selectedPrice.to - 1));
+                    const newRange = { from: newFrom, to: selectedPrice.to };
+                    setSelectedPrice(newRange);
+                    onPriceRangeChange({ min: newRange.from, max: newRange.to });
+                  }}
+                  className="block px-3 py-1.5 w-20 bg-transparent border-0 outline-none text-center"
+                />
               </div>
 
               <div className="text-custom-xs text-dark-4 flex rounded border border-gray-3/80">
-                <span className="block border-r border-gray-3/80 px-2.5 py-1.5">
+                <span className="block border-r border-gray-3/80 px-2.5 py-1.5 bg-gray-1">
                   $
                 </span>
-                <span id="maxAmount" className="block px-3 py-1.5">
-                  {selectedPrice.to}
-                </span>
+                <input
+                  type="number"
+                  min={selectedPrice.from + 1}
+                  max={maxProductPrice}
+                  value={selectedPrice.to}
+                  onChange={(e) => {
+                    const newTo = Math.max(selectedPrice.from + 1, Math.min(Number(e.target.value), maxProductPrice));
+                    const newRange = { from: selectedPrice.from, to: newTo };
+                    setSelectedPrice(newRange);
+                    onPriceRangeChange({ min: newRange.from, max: newRange.to });
+                  }}
+                  className="block px-3 py-1.5 w-20 bg-transparent border-0 outline-none text-center"
+                />
               </div>
             </div>
           </div>
         </div>
+
+        {/* Custom CSS for the range slider */}
+        <style jsx>{`
+          :global(.range-slider) {
+            margin: 20px 0;
+          }
+          
+          :global(.range-slider .range-slider__track) {
+            background: #e5e7eb;
+            height: 4px;
+            border-radius: 2px;
+          }
+          
+          :global(.range-slider .range-slider__range) {
+            background: #3b82f6;
+            height: 4px;
+            border-radius: 2px;
+          }
+          
+          :global(.range-slider .range-slider__thumb) {
+            background: white;
+            border: 2px solid #3b82f6;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: grab;
+          }
+          
+          :global(.range-slider .range-slider__thumb:active) {
+            cursor: grabbing;
+          }
+        `}</style>
       </div>
     </div>
   );

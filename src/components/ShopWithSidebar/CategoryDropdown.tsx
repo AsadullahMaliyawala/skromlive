@@ -78,7 +78,7 @@ const CategoryDropdown = ({ categories, selectedCategories, onCategoryChange, al
 
   const getProductCountForCategory = (categoryId: string) => {
     return allProducts.filter(product => 
-      product.category && product.category._id === categoryId
+      product.category && typeof product.category === 'object' && product.category._id === categoryId
     ).length;
   };
 

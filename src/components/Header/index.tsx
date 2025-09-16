@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import CustomSelect from "./CustomSelect";
 import { menuData } from "./menuData";
@@ -10,11 +10,17 @@ import { selectTotalPrice } from "@/redux/features/cart-slice";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
+import { getAllProducts } from "@/lib/sanity-api";
+import { Product } from "@/types/product";
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const searchRef = useRef<HTMLDivElement>(null);
   const { openCartModal } = useCartModalContext();
   const { data: session } = useSession();
 
@@ -33,6 +39,89 @@ const Header = () => {
       setStickyMenu(false);
     }
   };
+
+  // Load products for search
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const products = await getAllProducts();
+        setAllProducts(products);
+      } catch (error) {
+        console.error("Error fetching products for search:", error);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  // Handle search query changes
+  useEffect(() => {
+    const query = searchQuery.trim();
+    
+    if (query === "" || query.length < 2) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    // Add delay for better performance (debouncing)
+    const timeoutId = setTimeout(() => {
+      const normalizedQuery = query.toLowerCase();
+      const searchWords = normalizedQuery.split(/\s+/).filter(word => word.length > 1);
+      
+      console.log("Searching for:", normalizedQuery, "in", allProducts.length, "products");
+      
+      const filteredProducts = allProducts.filter((product) => {
+        if (!product || !product.title) return false;
+        
+        // Convert all searchable text to lowercase
+        const title = product.title.toLowerCase();
+        const description = product.description?.toLowerCase() || "";
+        const categoryName = typeof product.category === 'object' 
+          ? product.category?.name?.toLowerCase() || ""
+          : typeof product.category === 'string' 
+            ? product.category.toLowerCase() 
+            : "";
+        const tags = product.tags?.map(tag => tag.toLowerCase()).join(" ") || "";
+        
+        // Priority matching: exact phrase match gets higher priority
+        const exactMatch = title.includes(normalizedQuery) || 
+                          description.includes(normalizedQuery) ||
+                          categoryName.includes(normalizedQuery);
+        
+        if (exactMatch) return true;
+        
+        // Word-based matching: check if any search word matches
+        const wordMatch = searchWords.length > 0 && searchWords.some(word => {
+          return title.includes(word) ||
+                 description.includes(word) ||
+                 categoryName.includes(word) ||
+                 tags.includes(word);
+        });
+        
+        return wordMatch;
+      });
+
+      console.log("Found", filteredProducts.length, "matching products for query:", normalizedQuery);
+      setSearchResults(filteredProducts.slice(0, 5)); // Limit to 5 results
+      setShowSearchResults(filteredProducts.length > 0);
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, allProducts]);
+
+  // Handle clicks outside search to close results
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     window.addEventListener("scroll", handleStickyMenu);
@@ -73,8 +162,8 @@ const Header = () => {
               />
             </Link>
 
-            <div className="max-w-[475px] w-full">
-              <form>
+            <div className="max-w-[475px] w-full" ref={searchRef}>
+              <form onSubmit={(e) => e.preventDefault()}>
                 <div className="flex items-center">
                   {/* <CustomSelect options={options} /> */}
 
@@ -89,10 +178,12 @@ const Header = () => {
                       id="search"
                       placeholder="I am shopping for..."
                       autoComplete="off"
-                      className="custom-search w-full rounded-[5px] bg-gray-1 border border-gray-3 py-2.5 pl-4 pr-10 outline-none ease-in duration-200"
+                      className="custom-search w-full rounded-[5px] bg-gray-1 border border-gray-3 py-2.5 pl-4 pr-10 outline-none ease-in duration-200 focus:border-blue"
+                      onFocus={() => searchQuery && setShowSearchResults(true)}
                     />
 
                     <button
+                      type="submit"
                       id="search-btn"
                       aria-label="Search"
                       className="flex items-center justify-center absolute right-3 top-1/2 -translate-y-1/2 ease-in duration-200 hover:text-blue"
@@ -111,6 +202,71 @@ const Header = () => {
                         />
                       </svg>
                     </button>
+
+                    {/* Search Results Dropdown */}
+                    {showSearchResults && searchResults.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 bg-white border border-gray-3 rounded-[5px] shadow-lg mt-1 z-50 max-h-96 overflow-y-auto">
+                        {searchResults.map((product) => (
+                          <Link
+                            key={product._id}
+                            href={`/shop-details/${product.slug?.current || product.title?.toLowerCase().replace(/\s+/g, '-')}`}
+                            className="flex items-center gap-3 p-3 hover:bg-gray-1 border-b border-gray-3 last:border-b-0"
+                            onClick={() => {
+                              setShowSearchResults(false);
+                              setSearchQuery("");
+                            }}
+                          >
+                            <div className="w-12 h-12 bg-gray-2 rounded overflow-hidden flex-shrink-0">
+                              <Image
+                                src={product.thumbnails?.[0] || product.imgs?.thumbnails?.[0] || "/images/placeholder.jpg"}
+                                alt={product.title}
+                                width={48}
+                                height={48}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-medium text-sm text-dark truncate">
+                                {product.title}
+                              </h4>
+                              <p className="text-xs text-gray-5 truncate">
+                                {typeof product.category === 'object' ? product.category.name : product.category}
+                              </p>
+                              <span className="text-sm font-medium text-blue">
+                                ${product.discountedPrice || product.price}
+                              </span>
+                            </div>
+                          </Link>
+                        ))}
+                        {searchQuery && (
+                          <Link
+                            href={`/shop-with-sidebar?search=${encodeURIComponent(searchQuery)}`}
+                            className="block p-3 text-center text-blue hover:bg-gray-1 text-sm font-medium"
+                            onClick={() => {
+                              setShowSearchResults(false);
+                              setSearchQuery("");
+                            }}
+                          >
+                            View all results for "{searchQuery}"
+                          </Link>
+                        )}
+                      </div>
+                    )}
+
+                    {/* No Results */}
+                    {showSearchResults && searchQuery.trim().length >= 2 && searchResults.length === 0 && (
+                      <div className="absolute top-full left-0 right-0 bg-white border border-gray-3 rounded-[5px] shadow-lg mt-1 z-50 p-4 text-center">
+                        <div className="flex flex-col items-center gap-2">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-gray-4">
+                            <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                          <div>
+                            <p className="text-gray-5 text-sm font-medium">No products found</p>
+                            <p className="text-gray-4 text-xs">Try searching for "{searchQuery.trim()}" with different keywords</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </form>

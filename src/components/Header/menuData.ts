@@ -9,24 +9,30 @@ export const menuData: Menu[] = [
   },
   {
     id: 2,
+    title: "Play Online",
+    newTab: false,
+    path: "/play-online",
+  },
+  {
+    id: 3,
     title: "Rules",
     newTab: false,
     path: "/rules",
   },
   {
-    id: 3,
+    id: 4,
     title: "Video",
     newTab: false,
     path: "/video",
   },
   {
-    id: 4,
+    id: 5,
     title: "Buy Board Game",
     newTab: false,
     path: "/shop-with-sidebar",
   },
   {
-    id: 5,
+    id: 6,
     title: "Contact",
     newTab: false,
     path: "/contact",

@@ -199,3 +199,7 @@ input[type='search']::-webkit-search-results-decoration {
 .range-slider__range {
   @apply !bg-blue;
 }
+
+.preview-slider{
+  background-color: rgba(0, 0, 0, 0.889) !important;
+}

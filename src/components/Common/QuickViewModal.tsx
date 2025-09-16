@@ -29,7 +29,12 @@ const QuickViewModal = () => {
     if (!product) return;
     dispatch(updateproductDetails(product));
 
-    openPreviewModal();
+    // Close QuickView first so its overlay does not dim the fullscreen preview
+    closeModal();
+    // Slight delay to allow unmounting animations, then open preview
+    setTimeout(() => {
+      openPreviewModal();
+    }, 10);
   };
 
   // add to cart

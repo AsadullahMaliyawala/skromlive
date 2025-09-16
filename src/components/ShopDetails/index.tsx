@@ -5,7 +5,9 @@ import Image from "next/image";
 import Newsletter from "../Common/Newsletter";
 import RecentlyViewdItems from "./RecentlyViewd";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
-import { useAppSelector } from "@/redux/store";
+import { useAppSelector, AppDispatch } from "@/redux/store";
+import { useDispatch } from "react-redux";
+import { updateproductDetails } from "@/redux/features/product-details";
 import { Product } from "@/types/product";
 
 interface ShopDetailsProps {
@@ -14,6 +16,7 @@ interface ShopDetailsProps {
 
 const ShopDetails = ({ product: productProp }: ShopDetailsProps) => {
   const { openPreviewModal } = usePreviewSlider();
+  const dispatch = useDispatch<AppDispatch>();
   const [previewImg, setPreviewImg] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("tabOne");
@@ -51,6 +54,9 @@ const ShopDetails = ({ product: productProp }: ShopDetailsProps) => {
 
   // pass the product here when you get the real data.
   const handlePreviewSlider = () => {
+    if (product) {
+      dispatch(updateproductDetails(product));
+    }
     openPreviewModal();
   };
 
@@ -94,19 +100,18 @@ const ShopDetails = ({ product: productProp }: ShopDetailsProps) => {
 
                       <Image
                         src={(() => {
-                          // Get all unique images from both thumbnails and previews
+                          // Collect from all supported shapes
                           const allImages = [
                             ...(product.thumbnails || []),
                             ...(product.previews || []),
                             ...(product.imgs?.thumbnails || []),
-                            ...(product.imgs?.previews || [])
+                            ...(product.imgs?.previews || []),
+                            ...(Array.isArray((product as any).images) ? (product as any).images : []),
+                            ...(typeof (product as any).img === 'string' && (product as any).img ? [(product as any).img] : [])
                           ];
-                          
-                          // Remove duplicates by URL
                           const uniqueImages = allImages.filter((image, index, self) => 
-                            self.findIndex(img => img === image) === index
+                            image && self.findIndex(img => img === image) === index
                           );
-                          
                           return uniqueImages[previewImg] || "/images/placeholder.jpg";
                         })()}
                         alt={product.title || "Product details"}
@@ -119,19 +124,17 @@ const ShopDetails = ({ product: productProp }: ShopDetailsProps) => {
                   {/* ?  &apos;border-blue &apos; :  &apos;border-transparent&apos; */}
                   <div className="flex flex-wrap sm:flex-nowrap gap-4.5 mt-6">
                     {(() => {
-                      // Get all unique images from both thumbnails and previews
                       const allImages = [
                         ...(product.thumbnails || []),
                         ...(product.previews || []),
                         ...(product.imgs?.thumbnails || []),
-                        ...(product.imgs?.previews || [])
+                        ...(product.imgs?.previews || []),
+                        ...(Array.isArray((product as any).images) ? (product as any).images : []),
+                        ...(typeof (product as any).img === 'string' && (product as any).img ? [(product as any).img] : [])
                       ];
-                      
-                      // Remove duplicates by URL
                       const uniqueImages = allImages.filter((image, index, self) => 
-                        self.findIndex(img => img === image) === index
+                        image && self.findIndex(img => img === image) === index
                       );
-                      
                       return uniqueImages.map((item, key) => (
                       <button
                         onClick={() => setPreviewImg(key)}

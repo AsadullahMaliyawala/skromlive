@@ -4,6 +4,8 @@ import Breadcrumb from "../Common/Breadcrumb";
 import CustomSelect from "./CustomSelect";
 import CategoryDropdown from "./CategoryDropdown";
 import PriceDropdown from "./PriceDropdown";
+import SizeDropdown from "./SizeDropdown";
+import ColorsDropdwon from "./ColorsDropdwon";
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
 import { getAllProducts, getAllCategories } from "@/lib/sanity-api";
@@ -244,6 +246,12 @@ const ShopWithSidebar = () => {
                     onCategoryChange={setSelectedCategories}
                     allProducts={allProducts}
                   />
+
+                  {/* <!-- size box --> */}
+                  <SizeDropdown />
+
+                  {/* <!-- colors box --> */}
+                  <ColorsDropdwon />
 
                   {/* // <!-- price range box --> */}
                   <PriceDropdown 
